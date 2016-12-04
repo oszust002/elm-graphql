@@ -128,18 +128,24 @@ function performIntrospectionQuery(callback: (body: string) => void) {
   });
 }
 
+function capitalize(str: string) {
+    return str[0].toUpperCase() + str.substr(1);
+}
+
 function processFiles(schema: GraphQLSchema) {
   let paths = scanDir('.', []);
  
   for (let filePath of paths) {
     let fullpath = path.join(...filePath);
     let graphql = fs.readFileSync(fullpath, 'utf8');
-
+    let rootindex = fullpath.indexOf("src/");
+    let rootpath = fullpath.substr(rootindex + 4);
+    let pathdirs = rootpath.split('/');
+    let filepath = pathdirs.map(capitalize).join('.');
     let basename = path.basename(fullpath);
     let extname =  path.extname(fullpath);
     let filename = basename.substr(0, basename.length - extname.length);
-    let moduleName = filename[0].toUpperCase() + filename.substr(1);
-
+    let moduleName = filepath.substr(0, filepath.length - extname.length);
     let outPath = path.join(path.dirname(fullpath), filename + '.elm');
 
     let elm = queryToElm(graphql, moduleName, endpointUrl, verb, schema);
