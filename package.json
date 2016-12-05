@@ -6,6 +6,7 @@
   "bin": "bin/elm-graphql",
   "scripts": {
     "prepublish": "tsc",
+    "postinstall": "tsc",
     "tsc": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node lib/query-to-elm.js"
