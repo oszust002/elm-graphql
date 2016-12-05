@@ -233,8 +233,6 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
 
         return { expr: left + indent + right };
       } else {
-        let isMaybe = !(info_type instanceof GraphQLList ||
-                        info_type instanceof GraphQLNonNull);
         let decoder = leafTypeToDecoder(info_type);
         info.leave(field);
         let expr = { expr: '("' + originalName + '" := ' + decoder +')' };
