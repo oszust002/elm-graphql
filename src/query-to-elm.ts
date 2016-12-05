@@ -329,6 +329,13 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
   function encoderForInputType(type: GraphQLType, isNonNull?: boolean, value?: string): string {
     let encoder: string;
 
+    let isMaybe = false
+    if (type instanceof GraphQLNonNull) {
+      type = type['ofType'];
+    } else {
+      isMaybe = true;    
+    }
+
     if (type instanceof GraphQLInputObjectType) {
       let fieldEncoders: Array<string> = [];
       let fields = type.getFields();
@@ -340,8 +347,6 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
       encoder = '(Json.Encode.object [' + fieldEncoders.join(`, `) + '])';
     } else if (type instanceof GraphQLList) {
       encoder = '(Json.Encode.list (List.map (\\x -> ' + encoderForInputType(type.ofType, true, 'x') + ') ' + value + '))';
-    } else if (type instanceof GraphQLNonNull) {
-      encoder = encoderForInputType(type.ofType, true, value);
     } else if (type instanceof GraphQLScalarType) {
       switch (type.name) {
         case 'Int': encoder = 'Json.Encode.int ' + value; break;
@@ -354,7 +359,7 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
       throw new Error('not implemented: ' + type.constructor.name);
     }
 
-    if (!isNonNull && !(type instanceof GraphQLList) && !(type instanceof GraphQLNonNull)) {
+    if (isMaybe) {
       encoder = '(maybeEncode ' + encoder + ')'
     }
     return encoder;
