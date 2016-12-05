@@ -449,6 +449,8 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
 
   function walkField(field: Field, info: TypeInfo): ElmFieldDecl {
     info.enter(field);
+
+    let info_type = info.getType()
     // Name
     let name = elmSafeName(field.name.value);
     // Alias
@@ -460,19 +462,31 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
     // todo: Directives
     // SelectionSet
     if (field.selectionSet) {
-      let isList = info.getType() instanceof GraphQLList;
+      let isMaybe = false
+      if (info_type instanceof GraphQLNonNull) {
+	info_type = info_type['ofType']	
+      } else {
+	isMaybe = true
+      }
+
+      let isList = info_type instanceof GraphQLList;
       let [fields, spreads, union] = walkSelectionSet(field.selectionSet, info);
-      // record
+      
       let type: ElmType = union ? union : new ElmTypeRecord(fields);
-      // spreads
+
       for (let spreadName of spreads) {
         let typeName = spreadName[0].toUpperCase() + spreadName.substr(1) + '_';
         type = new ElmTypeApp(typeName, [type]);
       }
-      // list
+
       if (isList) {
         type = new ElmTypeApp('List', [type]);
       }
+
+      if (isMaybe) {
+	type = new ElmTypeApp('Maybe', [type]);
+      }
+
       info.leave(field);
       return new ElmFieldDecl(name, type)
     } else {

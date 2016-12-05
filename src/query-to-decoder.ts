@@ -188,6 +188,13 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
     let name = elmSafeName(field.name.value);
     let originalName = field.name.value;
 
+    let info_type = info.getType()
+    let isMaybe = false
+    if (info_type instanceof GraphQLNonNull) {
+      info_type = info_type['ofType'];
+    } else {
+      isMaybe = true;
+    }
     // Alias
     if (field.alias) {
       name = elmSafeName(field.alias.value);
@@ -199,14 +206,14 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
     
     // todo: Directives
     
-    if (info.getType() instanceof GraphQLUnionType) {
+    if (info_type instanceof GraphQLUnionType) {
       // Union
       return walkUnion(originalName, field, info);
     } else {
       // SelectionSet
       if (field.selectionSet) {
         let prefix = '';
-        if (info.getType() instanceof GraphQLList) {
+        if (info_type instanceof GraphQLList) {
           prefix = 'list ';
         }
 
@@ -218,14 +225,17 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
         let right = '(map ' + shape + ' ' + fields.expr + '))';
         let indent = '        ';
         if (prefix) {
-          return { expr: left + indent + '(' + prefix + right + ')' };
-        } else {
-          return { expr: left + indent + right };
-        }
+	  right = '(' + prefix + right + ')';
+	}
+	if (isMaybe) {
+	  right = '(' + 'maybe ' + right + ')';
+	}
+
+        return { expr: left + indent + right };
       } else {
-        let isMaybe = !(info.getType() instanceof GraphQLList ||
-                        info.getType() instanceof GraphQLNonNull);
-        let decoder = leafTypeToDecoder(info.getType());
+        let isMaybe = !(info_type instanceof GraphQLList ||
+                        info_type instanceof GraphQLNonNull);
+        let decoder = leafTypeToDecoder(info_type);
         info.leave(field);
         let expr = { expr: '("' + originalName + '" := ' + decoder +')' };
         if (isMaybe) {
