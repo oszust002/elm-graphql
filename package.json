@@ -5,7 +5,7 @@
   "main": "lib/main.js",
   "bin": "bin/elm-graphql",
   "scripts": {
-    "prepublish": "tsc -p src/",
+    "prepublish": "ls -l",
     "postinstall": "postinstall-build lib \"npm run prepublish\"",
     "tsc": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
