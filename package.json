@@ -6,7 +6,7 @@
   "bin": "bin/elm-graphql",
   "scripts": {
     "prepublish": "tsc",
-    "postinstall": "tsc -p ./src/",
+    "postinstall": "postinstall-build lib \"npm run prepublish\"",
     "tsc": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node lib/query-to-elm.js"
@@ -16,6 +16,7 @@
   "dependencies": {
     "command-line-args": "^3.0.1",
     "graphql": "^0.6.2",
+    "postinstall-build": "^2.1.3",
     "request": "^2.69.0",
     "source-map-support": "^0.4.0",
     "typescript": "^1.8.10"
