@@ -161,6 +161,25 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
     });
     return fragments;
   }
+
+  // Retrieve fragments used in the specified query definition selection set
+  function queryFragments(selectionSet: SelectionSet, fragments: FragmentDefinitionMap = {}): FragmentDefinitionMap {
+    if (selectionSet) {
+        visit(selectionSet, {
+            enter: function (node) {
+                if (node.kind == 'FragmentSpread') {
+                    let spread = <FragmentSpread>node;
+                    let name = spread.name.value;
+                    let frag = fragments[name] = fragmentDefinitionMap[name];
+                    fragments = queryFragments(frag.selectionSet, fragments);
+                }
+            },
+            leave: function (node) {
+            }
+        });
+    }
+    return fragments;
+  }
   
   function collectUnions(def: Definition, unions: GraphQLUnionMap = {}): GraphQLUnionMap {
     let info = new TypeInfo(schema);
@@ -274,12 +293,18 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
         }
       }
       let funcName = name[0].toLowerCase() + name.substr(1);
-      // include all fragment dependencies in the query
+
+      // grabs all fragments
       let seenFragments = collectFragments(def);
+
+      // grabs all fragment dependencies in the query
+      let qFragments = queryFragments(def.selectionSet);
+
       let query = '';
-      for (let name in seenFragments) {
-        query += print(seenFragments[name]) + ' ';
+      for (let name in qFragments) {
+        query += print(qFragments[name]) + ' ';
       }
+
       query += print(def);
       let decodeFuncName = resultType[0].toLowerCase() + resultType.substr(1) + 'Decoder';
       expose.push(funcName);
