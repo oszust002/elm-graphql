@@ -149,7 +149,7 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
       }
     }
     info.leave(selSet);
-    return { expr: fields.map(f => f.expr).filter(e => e.length > 0).join('\n        `apply` ') }
+    return { expr: fields.map(f => f.expr).filter(e => e.length > 0).join('\n        |> apply ') }
   }
 
   function getSelectionSetFields(selSet: SelectionSet, info: TypeInfo): Array<string> {
@@ -221,7 +221,7 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
         info.leave(field);
         let fieldNames = getSelectionSetFields(field.selectionSet, info);
         let shape = `(\\${fieldNames.join(' ')} -> { ${fieldNames.map(f => f + ' = ' + f).join(', ')} })`;
-        let left = '("' + originalName + '" :=\n';
+        let left = '(field "' + originalName + '" \n';
         let right = '(map ' + shape + ' ' + fields.expr + '))';
         let indent = '        ';
         if (prefix) {
@@ -235,7 +235,7 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
       } else {
         let decoder = leafTypeToDecoder(info_type);
         info.leave(field);
-        let expr = { expr: '("' + originalName + '" := ' + decoder +')' };
+        let expr = { expr: '(field "' + originalName + '" ' + decoder +')' };
         if (isMaybe) {
           expr = { expr: '(maybe ' + expr.expr + ')' };
         }
@@ -274,8 +274,8 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
 
     decoder += `\n${indent}_ -> fail "Unexpected union type")`;
 
-    decoder = '(("__typename" := string) `andThen` ' + decoder + ')';
-    return { expr: '("' + originalName + '" := ' + decoder +')' };
+    decoder = '((field "__typename" string) `andThen` ' + decoder + ')';
+    return { expr: '(field "' + originalName + '" ' + decoder +')' };
   }
 
   function leafTypeToDecoder(type: GraphQLType): string {

@@ -75,7 +75,6 @@ export function queryToElm(graphql: string, moduleName: string, liveUrl: string,
   let queryDocument = parse(graphql);
   let [decls, expose] = translateQuery(liveUrl, queryDocument, schema, verb);
   return moduleToString(moduleName, expose, [
-    'Task exposing (Task)',
     'Json.Decode exposing (..)',
     'Json.Encode exposing (encode)',
     'Http',
@@ -316,7 +315,7 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
       let methodParam = def.operation == 'query' ? `"${verb}" ` : '';
 
       decls.push(new ElmFunctionDecl(
-         funcName, elmParamsDecl, new ElmTypeName(`Task Http.Error ${resultType}`),
+         funcName, elmParamsDecl, new ElmTypeName(`Http.Request ${resultType}`),
          {
            // we use awkward variable names to avoid naming collisions with query parameters
            expr: `let graphQLQuery = """${query.replace(/\s+/g, ' ')}""" in\n` +
@@ -570,11 +569,11 @@ export function typeToElm(type: GraphQLType, isNonNull = false): ElmType {
 
 export function elmSafeName(graphQlName: string): string {
   switch (graphQlName) {
-    case 'type': return "type'";
-    case 'Task': return "Task'";
-    case 'List': return "List'";
-    case 'Http': return "Http'";
-    case 'GraphQL': return "GraphQL'";
+    case 'type': return "type_";
+    case 'Task': return "Task_";
+    case 'List': return "List_";
+    case 'Http': return "Http_";
+    case 'GraphQL': return "GraphQL_";
     // todo: more...
     default: return graphQlName;
   }
