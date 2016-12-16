@@ -233,12 +233,15 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
 
         return { expr: left + indent + right };
       } else {
+
         let decoder = leafTypeToDecoder(info_type);
-        info.leave(field);
-        let expr = { expr: '(field "' + originalName + '" ' + decoder +')' };
+        let expr = { expr: '(field "' + originalName + '" (' + decoder +'))' };
+
         if (isMaybe) {
           expr = { expr: '(maybe ' + expr.expr + ')' };
         }
+
+        info.leave(field);
         return expr;
       }
     }
@@ -281,19 +284,10 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
   function leafTypeToDecoder(type: GraphQLType): string {
     let prefix = '';
 
-    // lists or non-null of leaf types only
-    let t: GraphQLType;
     if (type instanceof GraphQLList) {
-      t = type.ofType;
       prefix = 'list ';
-    } else if (type instanceof GraphQLNonNull) {
-      t = type.ofType;
-    } else {
-      // implicitly nullable
-      t = type;
+      type = type['ofType'];
     }
-    type = t;
-
     // leaf types only
     if (type instanceof GraphQLScalarType) {
       switch (type.name) {

@@ -532,8 +532,11 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
 
 export function typeToElm(type: GraphQLType, isNonNull = false): ElmType {
   let elmType: ElmType;
-  
-  if (type instanceof GraphQLScalarType) {
+
+  if (type instanceof GraphQLNonNull) {
+    elmType = typeToElm(type.ofType, true);
+  }
+  else if (type instanceof GraphQLScalarType) {
     switch (type.name) {
       case 'Int': elmType = new ElmTypeName('Int'); break;
       case 'Float': elmType = new ElmTypeName('Float'); break;
@@ -555,8 +558,6 @@ export function typeToElm(type: GraphQLType, isNonNull = false): ElmType {
       fields.push(new ElmFieldDecl(elmSafeName(fieldName), typeToElm(field.type)))
     }
     elmType = new ElmTypeRecord(fields);
-  } else if (type instanceof GraphQLNonNull) {
-    elmType = typeToElm(type.ofType, true);
   } else {
     throw new Error('Unexpected: ' + type.constructor.name);
   }
