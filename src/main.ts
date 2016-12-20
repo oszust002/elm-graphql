@@ -74,8 +74,6 @@ if (options.init) {
   });
 }
 
-
-
 if (!config) {
   console.error('elm-graphql is not configured for this package. You need to run `elm graphql --init [URL]`.');
   process.exit(1);
@@ -85,11 +83,19 @@ if (!config) {
 let verb = config.method || 'GET';
 let endpointUrl = config.endpoint;
 
-performIntrospectionQuery(body => {
-  let result = JSON.parse(body);
-  let schema = buildClientSchema(result.data);
-  processFiles(schema);
-});
+if (options.schema) {
+    const filepath = path.resolve(options.schema);
+    const obj = require(filepath);
+    let schema = buildClientSchema(obj.data)
+    processFiles(schema);
+}
+else {
+    performIntrospectionQuery(body => {
+        let result = JSON.parse(body);
+        let schema = buildClientSchema(result.data);
+        processFiles(schema);
+    });
+}
 
 function performIntrospectionQuery(callback: (body: string) => void) {
   // introspection query
