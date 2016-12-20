@@ -79,11 +79,17 @@ if (!config) {
   process.exit(1);
 }
 
+if (options.endpoint) {
+    config = {
+        endpoint: options.endpoint
+    };
+}
+
 // output config
 let verb = config.method || 'GET';
 let endpointUrl = config.endpoint;
 
-if (options.schema) {
+if (options.schema || config.schema) {
     const filepath = path.resolve(options.schema);
     const obj = require(filepath);
     let schema = buildClientSchema(obj.data)
@@ -99,7 +105,7 @@ else {
 
 function performIntrospectionQuery(callback: (body: string) => void) {
   // introspection query
-  let introspectionUrl = config.schema || config.endpoint;
+  let introspectionUrl = config.endpoint;
   if (!introspectionUrl) {
     console.log('Error: missing graphql endpoint in elm-package.json');
     process.exit(1);
@@ -192,5 +198,5 @@ function usage() {
   console.error('Usage: elm graphql --init ENDPOINT-URL');
   console.error(' ');
   console.error('Available options:');
-  console.error('  --schema URL            URL of the schema endpoint, if different.');
+  console.error('  --schema filepath            relative path to schema file (JSON).');
 }
