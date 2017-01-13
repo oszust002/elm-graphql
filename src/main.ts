@@ -74,15 +74,15 @@ if (options.init) {
   });
 }
 
-if (!config) {
-  console.error('elm-graphql is not configured for this package. You need to run `elm graphql --init [URL]`.');
-  process.exit(1);
-}
-
 if (options.endpoint) {
     config = {
         endpoint: options.endpoint
     };
+}
+
+if (!config) {
+    console.error('elm-graphql is not configured for this package. You need to run `elm graphql --init [URL]`.');
+    process.exit(1);
 }
 
 // output config
