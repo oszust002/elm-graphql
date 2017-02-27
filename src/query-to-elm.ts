@@ -251,8 +251,8 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
     return new ElmFunctionDecl(enumType.name.toLowerCase() + 'Decoder', [], new ElmTypeName('Decoder ' + decoderTypeName),
         { expr: 'string |> andThen (\\s ->\n' +
                 '        case s of\n' + enumType.getValues().map(v =>
-                '            "' + v.name + '" -> Ok ' + v.name[0].toUpperCase() + v.name.substr(1)).join('\n') + '\n' +
-                '            _ -> Err "Unknown ' + enumType.name + '")'
+                '            "' + v.name + '" -> succeed ' + v.name[0].toUpperCase() + v.name.substr(1)).join('\n') + '\n' +
+                '            _ -> fail "Unknown ' + enumType.name + '")'
               });
   }
 
