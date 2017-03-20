@@ -241,7 +241,6 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
   }
 
   function walkEnum(enumType: GraphQLEnumType): ElmTypeDecl {
-    console.log(enumType.getValues())
     return new ElmTypeDecl(enumType.name, enumType.getValues().map(v => v.name[0].toUpperCase() + v.name.substr(1)));
   }
 
@@ -378,6 +377,7 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
         case 'Float': encoder = 'Json.Encode.float ' + value; break;
         case 'Boolean': encoder = 'Json.Encode.bool ' + value; break;
         case 'ID':
+        case 'DateTime': encoder = 'Json.Encode.string ' + value; break;
         case 'String': encoder = 'Json.Encode.string ' + value; break;
       }
     } else {
@@ -402,11 +402,13 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
 
     // SelectionSet
     let [fields, spreads] = walkSelectionSet(def.selectionSet, info);
+
     let type: ElmType = new ElmTypeRecord(fields, 'a')
     for (let spreadName of spreads) {
       let typeName = spreadName[0].toUpperCase() + spreadName.substr(1) + '_';
       type = new ElmTypeApp(typeName, [type]);
     }
+    
     
     decls.push(new ElmTypeAliasDecl(resultType + '_', type, ['a']));
     decls.push(new ElmTypeAliasDecl(resultType, new ElmTypeApp(resultType + '_', [new ElmTypeRecord([])])));
@@ -543,6 +545,7 @@ export function typeToElm(type: GraphQLType, isNonNull = false): ElmType {
       case 'Float': elmType = new ElmTypeName('Float'); break;
       case 'Boolean': elmType = new ElmTypeName('Bool'); break;
       case 'ID':
+      case 'DateTime': elmType = new ElmTypeName('String'); break;
       case 'String': elmType = new ElmTypeName('String'); break;
     }
   } else if (type instanceof GraphQLEnumType) {
