@@ -122,7 +122,7 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
       let seenEnum = seenEnums[name];
       decls.unshift(walkEnum(seenEnum));
       decls.push(decoderForEnum(seenEnum));
-      expose.push(seenEnum.name);
+      expose.push(seenEnum.name+'(..)');
     }
 
     for (let name in seenUnions) {
