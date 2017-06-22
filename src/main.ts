@@ -17,7 +17,8 @@ import * as commandLineArgs from 'command-line-args';
 import { introspectionQuery, buildClientSchema } from 'graphql/utilities';
 import { GraphQLSchema } from 'graphql/type';
 import { queryToElm } from './query-to-elm';
-
+import { validate } from 'graphql/validation';
+import * as Lang from 'graphql/language';
 // entry point
 
 let optionDefinitions = [
@@ -150,6 +151,17 @@ function processFiles(schema: GraphQLSchema) {
   for (let filePath of paths) {
     let fullpath = path.join(...filePath);
     let graphql = fs.readFileSync(fullpath, 'utf8');
+    let doc = Lang.parse(graphql)
+    let errors = validate(schema, doc)
+
+    if(errors.length) {
+      console.error('Error processing '+fullpath+': ')
+      for (let err of errors) {
+	console.error(' -' + err.message);
+      }
+      process.exit(1)
+    }
+
     let rootindex = fullpath.indexOf("src/");
     let rootpath = fullpath.substr(rootindex + 4);
     let pathdirs = rootpath.split('/');
