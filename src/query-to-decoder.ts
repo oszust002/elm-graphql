@@ -295,6 +295,7 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
         case 'Float': return prefix + 'float';
         case 'Boolean': return prefix + 'bool';
         case 'ID':
+        case 'DateTime': return prefix + 'string';
         case 'String': return prefix + 'string';
       }
     } else if (type instanceof GraphQLEnumType) {
