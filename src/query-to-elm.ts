@@ -89,7 +89,7 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
   function walkQueryDocument(doc: Document, info: TypeInfo): [Array<ElmDecl>, Array<string>] {
     let decls: Array<ElmDecl> = [];
     decls.push(new ElmFunctionDecl('endpointUrl', [], new ElmTypeName('String'), { expr: `"${uri}"` }));
-
+    decls.push(new ElmFunctionDecl('swappedApply', [new ElmParameterDecl('value', new ElmTypeName('Decoder a')), new ElmParameterDecl('func', new ElmTypeName('Decoder (a -> b)'))], new ElmTypeName('Decoder b'), { expr: 'apply func value' }));
     buildFragmentDefinitionMap(doc);
     let seenFragments: FragmentDefinitionMap = {};
     let seenEnums: GraphQLEnumMap = {};
