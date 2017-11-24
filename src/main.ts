@@ -25,6 +25,7 @@ let optionDefinitions = [
   { name: 'init', type: Boolean },
   { name: 'endpoint', type: String, defaultOption: true },
   { name: 'schema', type: String },
+  { name: 'output', type: String },
   { name: 'method', type: String },
   { name: 'help', type: Boolean },
 ];
@@ -66,6 +67,10 @@ if (options.init) {
     elmPackageJson.graphql.method = options.method;
   }
 
+  if (options.output) {
+    elmPackageJson.graphql.output = options.output;
+  }
+
   // check that the endpoint works
   performIntrospectionQuery(body => {
     fs.writeFileSync('elm-package.json', JSON.stringify(elmPackageJson, null, '    '));
@@ -89,18 +94,22 @@ if (!config) {
 // output config
 let verb = config.method || 'GET';
 let endpointUrl = config.endpoint;
+let outputPath = config.options || null;
+if (options.output) {
+  outputPath = options.output;
+}
 
 if (options.schema || config.schema) {
     const filepath = path.resolve(options.schema);
     const obj = require(filepath);
     let schema = buildClientSchema(obj.data)
-    processFiles(schema);
+    processFiles(schema, outputPath);
 }
 else {
     performIntrospectionQuery(body => {
         let result = body;
         let schema = buildClientSchema(result.data);
-        processFiles(schema);
+        processFiles(schema, outputPath);
     });
 }
 
@@ -146,7 +155,7 @@ function capitalize(str: string) {
     return str[0].toUpperCase() + str.substr(1);
 }
 
-function processFiles(schema: GraphQLSchema) {
+function processFiles(schema: GraphQLSchema, outputPath: String) {
   let paths = scanDir('.', []);
  
   for (let filePath of paths) {
@@ -171,7 +180,8 @@ function processFiles(schema: GraphQLSchema) {
     let extname =  path.extname(fullpath);
     let filename = basename.substr(0, basename.length - extname.length);
     let moduleName = filepath.substr(0, filepath.length - extname.length);
-    let outPath = path.join(path.dirname(fullpath), filename + '.elm');
+    let elmPath = outputPath || path.dirname(fullpath);
+    let outPath = path.join(elmPath, filename + '.elm');
 
     let elm = queryToElm(graphql, moduleName, endpointUrl, verb, schema);
     fs.writeFileSync(outPath, elm);
