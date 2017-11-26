@@ -86,6 +86,7 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
         name = 'AnonymousQuery';
       }
       let resultType = name[0].toUpperCase() + name.substr(1);
+      let gqlType = 'Gql'+resultType;
       // todo: Directives
       // SelectionSet
       let expr = walkSelectionSet(def.selectionSet, info);
@@ -101,8 +102,17 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
         }
       }
       info.leave(def);
-      
-      return { expr: 'map ' + resultType + ' ' + expr.expr };
+
+      return { expr: `map ${gqlType}\n` +
+      '        (maybe\n' +
+      '            (field "error"\n' +
+      '                (list\n' +
+      '                    (map (\\status message -> { status = status, message = message }) (field "status" (int)) \n' +
+      '                        |> swappedApply (field "message" (string)))\n' +
+      '                )\n' +
+      '            )\n' +
+      '        )\n' +
+      '        |> swappedApply (maybe (field "data" (map ' + resultType + ' ' + expr.expr + '))'};
     }
   }
 

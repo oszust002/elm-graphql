@@ -315,6 +315,8 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
           new ElmTypeApp('Maybe', [new ElmTypeApp('List', [new ElmTypeRecord(errorFields)])]));
       decls.push(new ElmTypeAliasDecl(gqlType,new ElmTypeRecord([errorField, dataField])));
 
+      expose.push(gqlType);
+
       let elmParamsType = new ElmTypeRecord(parameters.map(p => new ElmFieldDecl(p.name, p.type)));
       let elmParams = new ElmParameterDecl('params', elmParamsType);
       let elmParamsDecl = elmParamsType.fields.length > 0 ? [elmParams] : [];
@@ -346,9 +348,10 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
          }
       ));
       let resultTypeName = resultType[0].toUpperCase() + resultType.substr(1);
+      let gqlTypeName = 'Gql'+resultTypeName;
       decls.push(new ElmFunctionDecl(
          decodeFuncName, [],
-         new ElmTypeName('Decoder ' + resultTypeName),
+         new ElmTypeName('Decoder ' + gqlTypeName),
          decoderForQuery(def, info, schema, fragmentDefinitionMap, seenFragments) ));
       
       info.leave(def);
