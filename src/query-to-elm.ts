@@ -305,13 +305,23 @@ function translateQuery(uri: string, doc: Document, schema: GraphQLSchema, verb:
       expose.push(funcName);
       expose.push(resultType);
 
+      let gqlType = 'Gql' + resultType;
+      let dataField = new ElmFieldDecl('data', new ElmTypeApp('Maybe', [new ElmTypeName(resultType)]));
+      let errorFields = [
+          new ElmFieldDecl('status', new ElmTypeName('Int')),
+          new ElmFieldDecl('message', new ElmTypeName('String'))
+      ];
+      let errorField = new ElmFieldDecl('errors',
+          new ElmTypeApp('Maybe', [new ElmTypeApp('List', [new ElmTypeRecord(errorFields)])]));
+      decls.push(new ElmTypeAliasDecl(gqlType,new ElmTypeRecord([errorField, dataField])));
+
       let elmParamsType = new ElmTypeRecord(parameters.map(p => new ElmFieldDecl(p.name, p.type)));
       let elmParams = new ElmParameterDecl('params', elmParamsType);
       let elmParamsDecl = elmParamsType.fields.length > 0 ? [elmParams] : [];
       let methodParam = def.operation == 'query' ? `"${verb}" ` : '';
 
       decls.push(new ElmFunctionDecl(
-         funcName, elmParamsDecl, new ElmTypeName(`Http.Request ${resultType}`),
+         funcName, elmParamsDecl, new ElmTypeName(`Http.Request ${gqlType}`),
          {
            // we use awkward variable names to avoid naming collisions with query parameters
            expr: `let graphQLQuery = """${query.replace(/\s+/g, ' ')}""" in\n` +
