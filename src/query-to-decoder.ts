@@ -112,7 +112,7 @@ export function decoderFor(def: OperationDefinition | FragmentDefinition, info: 
       '                )\n' +
       '            )\n' +
       '        )\n' +
-      '        |> swappedApply (maybe (field "data" (map ' + resultType + ' ' + expr.expr + '))'};
+      '        |> swappedApply (maybe (field "data" (map ' + resultType + ' ' + expr.expr + ')))'};
     }
   }
 
