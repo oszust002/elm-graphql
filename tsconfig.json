@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2017",
     "sourceMap": true,
     "module": "commonjs",
+    "moduleResolution": "node",
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true,
     "outDir": "lib"

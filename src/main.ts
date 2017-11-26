@@ -3,21 +3,16 @@
  * All rights reserved.
  */
 
-/// <reference path="../typings/node.d.ts" />
-/// <reference path="../typings/request.d.ts" />
-/// <reference path="../typings/graphql-utilities.d.ts" />
-/// <reference path="../typings/command-line-args.d.ts" />
-
 import 'source-map-support/register';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import * as request from 'request';
 import * as commandLineArgs from 'command-line-args';
-import { introspectionQuery, buildClientSchema } from 'graphql/utilities';
+import { introspectionQuery, buildClientSchema } from 'graphql';
 import { GraphQLSchema } from 'graphql/type';
 import { queryToElm } from './query-to-elm';
-import { validate } from 'graphql/validation';
+import { validate } from 'graphql';
 import * as Lang from 'graphql/language';
 // entry point
 
@@ -72,7 +67,7 @@ if (options.init) {
   }
 
   // check that the endpoint works
-  performIntrospectionQuery(body => {
+  performIntrospectionQuery(() => {
     fs.writeFileSync('elm-package.json', JSON.stringify(elmPackageJson, null, '    '));
     
     console.log('Success! You should now run `elm package install jahewson/elm-graphql-module`.');
@@ -102,13 +97,12 @@ if (options.output) {
 if (options.schema || config.schema) {
     const filepath = path.resolve(options.schema);
     const obj = require(filepath);
-    let schema = buildClientSchema(obj.data)
+    let schema = buildClientSchema(obj.data);
     processFiles(schema, outputPath);
 }
 else {
     performIntrospectionQuery(body => {
-        let result = body;
-        let schema = buildClientSchema(result.data);
+        let schema = buildClientSchema(body.data);
         processFiles(schema, outputPath);
     });
 }
@@ -155,17 +149,17 @@ function capitalize(str: string) {
     return str[0].toUpperCase() + str.substr(1);
 }
 
-function processFiles(schema: GraphQLSchema, outputPath: String) {
+function processFiles(schema: GraphQLSchema, outputPath: string) {
   let paths = scanDir('.', []);
  
   for (let filePath of paths) {
     let fullpath = path.join(...filePath);
     let graphql = fs.readFileSync(fullpath, 'utf8');
-    let doc = Lang.parse(graphql)
-    let errors = validate(schema, doc)
+    let doc = Lang.parse(graphql);
+    let errors = validate(schema, doc);
 
     if(errors.length) {
-      console.error('Error processing '+fullpath+': ')
+      console.error('Error processing '+fullpath+': ');
       for (let err of errors) {
 	console.error(' -' + err.message);
       }

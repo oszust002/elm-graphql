@@ -15,15 +15,16 @@
   "license": "BSD",
   "dependencies": {
     "command-line-args": "^3.0.1",
-    "graphql": "^0.6.2",
+    "graphql": "^0.11.7",
     "request": "^2.69.0",
     "source-map-support": "^0.4.0",
-    "typescript": "^1.8.10"
+    "typescript": "^2.6.1",
+    "@types/node": "^8.0.53"
   },
   "devDependencies": {
     "express": "^4.14.0",
-    "express-graphql": "^0.5.3",
-    "graphql-tools": "^0.6.1",
+    "express-graphql": "^0.6.11",
+    "graphql-tools": "^2.8.0",
     "typescript": "^1.8.0"
   }
 }

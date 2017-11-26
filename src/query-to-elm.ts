@@ -3,12 +3,6 @@
  * All rights reserved.
  */
 
-/// <reference path="../typings/node.d.ts" />
-/// <reference path="../typings/es6-function.d.ts" />
-/// <reference path="../typings/graphql-types.d.ts" />
-/// <reference path="../typings/graphql-language.d.ts" />
-/// <reference path="../typings/graphql-utilities.d.ts" />
-
 import {
   Definition,
   OperationDefinition,
@@ -22,7 +16,7 @@ import {
   parse,
   print,
   visit
-} from "graphql/language";
+} from "graphql";
 
 import {
   ElmFieldDecl,
@@ -50,12 +44,12 @@ import {
   GraphQLInterfaceType,
   GraphQLInputObjectType,
   GraphQLUnionType
-} from 'graphql/type';
+} from 'graphql';
 
 import {
   TypeInfo,
   typeFromAST,
-} from 'graphql/utilities';
+} from 'graphql';
 
 import {
   decoderForQuery,
